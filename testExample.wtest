@@ -1,9 +1,97 @@
-import example.pepita
 
+import destinos.*
+import empresa.*
+import mensajeros.*
+import vehiculos.*
+import paquetes.*
 describe "group of tests for pepita" {
 
-  test "pepita has initial energy" {
-    assert.equals(100, pepita.energy())
+  test "Que roberto (90kg) puede llevar un paquete que está pago en un camión que tiene un acoplado." {
+    paquete.cambiarMensajero(roberto)
+    paquete.verMensajero().cambiarPeso(90)
+    paquete.verMensajero().cambiarVehiculo(camion)
+    camion.cambiarAcoplados(1)
+    assert.that(paquete.puedeSerEntregado(paquete.verMensajero()))
+  }
+  test "Que neo con crédito no puede llevar un paquete que no está pago a la matrix." {
+    paquete.cambiarMensajero(neo)
+    paquete.cambiarDestino(matrix)
+    paquete.verMensajero().cambiarEstadoDeCredito(false)
+    paquete.cambiarPago(true)
+    assert.notThat(paquete.puedeSerEntregado(paquete.verMensajero()))
   }
 
+  test "dado que la empresa tiene 3 empleados, mensajeriaEsGrande devuelve true" {
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(chuckNorris)
+    empresa.contratarEmpleado(neo)
+    assert.that(empresa.mensajeriaEsGrande())
+
+  }
+  test "el primer mensajero puede llevar el paquete" {
+    empresa.contratarEmpleado(chuckNorris)
+    paquete.cambiarMensajeroDestinoYPago(empresa.empleados().first(), puenteDeBrooklyn, true)
+    assert.that(empresa.puedeSerEntregadoPorElPrimerMensajero())
+
+  }
+  test "peso del ultimo contratado" {
+    roberto.cambiarPeso(100)
+    empresa.contratarEmpleado(chuckNorris)
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(neo)
+    assert.equals(0, empresa.pesoDelUltimoMensajero())
+
+  }
+
+}
+describe "test de la tercera parte" {
+  test "Averiguar si un paquete puede ser entregado por la empresa 
+  de mensajería, es decir, si al menos uno de sus mensajeros puede entregar el paquete" {
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(neo)
+    empresa.contratarEmpleado(chuckNorris)
+    assert.that(empresa.algunEmpleadoPuedeEntregarElPaquete(paquete))
+  }
+  /*
+  test "Obtener todos los mensajeros que pueden llevar un paquete dado."{
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(neo)
+    empresa.contratarEmpleado(chuckNorris)
+    const mensajerosQuePueden = empresa.todosLosEmpleadosQuePuedenEntregarElPaquete(paquete)
+    assert.equals(mensajerosQuePueden, mensajerosQuePueden)
+  }*/
+  test "Saber si la empresa de mensajería tiene sobrepeso, es decir, si el peso promedio de sus mensajeros es mayor a 500kg." {
+    roberto.cambiarPeso(80)
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(neo)
+    empresa.contratarEmpleado(chuckNorris)
+    assert.notThat(empresa.mensajeriaTieneSobrepeso())
+  }
+  test "Conocer la facturación de la empresa, que es el total ganado por los paquetes enviados"{
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(neo)
+    empresa.contratarEmpleado(chuckNorris)
+    empresa.enviarPaquete(paquete)
+    assert.equals(50, empresa.facturacionTotalDeLaEmpresa())
+  }
+  test "Dado un conjunto de paquetes, enviarlos a todos. cada paquete vale 50 y el paqueton 
+        viajero vale 200 porque hay 2 destinos"{
+    empresa.contratarEmpleado(roberto)
+    empresa.contratarEmpleado(neo)
+    empresa.contratarEmpleado(chuckNorris)
+    paquetonViajero.agregarDestino(puenteDeBrooklyn)
+    paquetonViajero.agregarDestino(matrix)
+    paquetonViajero.pagoParcial(100)
+    paquetonViajero.pagoParcial(100)
+    empresa.enviarTodosLosPaquetes([paquete, paquete, paquete,paquetonViajero])
+    assert.equals(350, empresa.facturacionTotalDeLaEmpresa())
+  }
+  test "probar nuevo paquete con el mensajero secreto que no tiene crédito y no puede pasar a la matrix"{
+    empresa.contratarEmpleado(mensajeroSecreto)
+    paqueteGigante.agregarPaquete(paquete)
+    paquete.cambiarDestino(matrix)
+    paqueteGigante.agregarPaquete(paquetito)
+    mensajeroSecreto.cambiarCredito(false)
+    assert.notThat(paqueteGigante.puedeSerEntregado(mensajeroSecreto)  )
+  }
 }
